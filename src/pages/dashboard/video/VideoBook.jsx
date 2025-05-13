@@ -159,7 +159,7 @@ import {
         key: "image",
         label: "Image",
         render: (row) => (
-          <img src={row.image} alt={row.title} className="w-16 h-16 rounded" />
+          <img src={`${import.meta.env.VITE_BASE_URL_IMAGE}${row.image}`} alt={row.title} className="w-16 h-16 rounded" />
         ),
       },
       { key: "title", label: "Title", render: (row) => `${row.title}` },

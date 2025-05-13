@@ -17,40 +17,35 @@ const Login = () => {
     }
 
     try {
-      // const formData = new URLSearchParams();
-
-      // formData.append("email", email);
-      // formData.append("password", password);
-
       const payload = {
-        email: email,
-        password: password,
+        email,
+        password,
       };
 
       const res = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/auth/admin/login`,
-        // formData,
+        `${import.meta.env.VITE_BASE_URL}admin-login`,
         payload,
         {
           headers: { "Content-Type": "application/json" },
-          withCredentials: true, // Ensure cookies are included
+          withCredentials: true, // Include cookies if backend sets them
         }
       );
-      console.log("Response:", res.data);
-      if (res.data.status === 200) {
-        console.log("Login Success");
-        const token = res.data.data.token;
 
-        // Store the token in cookies
+      // console.log("Full login response:", res);
+
+      // Check real HTTP status and presence of token
+      if (res.data.success === true && res.data?.token) {
+        const token = res.data.token;
+
+        // Save token to cookies
         Cookies.set("token", token, {
           expires: 7,
           secure: false,
           sameSite: "Strict",
         });
-        console.log("cookies set");
 
-        // Redirect to dashboard
-        navigate("/");
+        // console.log("Login successful. Token saved in cookies.");
+        navigate("/"); // Redirect to homepage
       } else {
         alert("Login failed! Please try again.");
       }
@@ -58,7 +53,7 @@ const Login = () => {
       console.error("Login Error:", error);
       alert(
         error.response?.data?.message ||
-          "An error occurred during login. Please try again."
+        "An error occurred during login. Please try again."
       );
     }
   };
@@ -68,12 +63,9 @@ const Login = () => {
       <div className="lg:w-1/2 xl:max-w-screen-sm">
         <div className="py-12 bg-indigo-100 lg:bg-white flex justify-center lg:justify-start lg:px-12">
           <div className="cursor-pointer flex items-center">
-            {/* <div className="w-32 h-4 text-indigo-800 tracking-wide ml-2 font-semibold">
-              <img src="https://sooprs.com/images/sooprs_logo.png" alt="Logo" />
-            </div> */}
-            <div className=" text-3xl text-indigo-800 tracking-wide ml-2 font-semibold">
-            Stanley Admin
-              </div>
+            <div className="text-3xl text-indigo-800 tracking-wide ml-2 font-semibold">
+              Ecommerce
+            </div>
           </div>
         </div>
         <div className="mt-10 px-12 sm:px-24 md:px-48 lg:px-12 xl:px-24 xl:max-w-2xl">
@@ -118,7 +110,6 @@ const Login = () => {
               </button>
             </div>
           </form>
-        
         </div>
       </div>
       <div className="hidden lg:flex items-center justify-center bg-indigo-100 flex-1 h-screen">

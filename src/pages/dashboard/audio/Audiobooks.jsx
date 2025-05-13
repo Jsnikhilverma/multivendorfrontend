@@ -9,158 +9,98 @@ import {
   DialogFooter,
   DialogHeader,
   IconButton,
-  Input,
   Spinner,
-  Textarea,
-  Tooltip,
   Typography,
+  Tooltip,
+  Input,
 } from "@material-tailwind/react";
-import { PhotoIcon, SpeakerWaveIcon } from "@heroicons/react/24/solid";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useCallback, useEffect, useState } from "react";
-import Toaster, {
-  showSuccessToast,
-  showErrorToast,
-} from "../../../components/Toaster";
+import Toaster, { showSuccessToast, showErrorToast } from "../../../components/Toaster";
 import CustomTable from "../../../components/CustomTable";
-import { Eye} from "lucide-react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Audiobooks = () => {
   const token = Cookies.get("token");
   const [audiobooks, setAudiobooks] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
-  const [audioFile, setAudioFile] = useState(null);
+  const [logo, setLogo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   // Form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-
+  const [name, setTitle] = useState("");
+  const [email, setDescription] = useState("");
+  const [password, setPrice] = useState("");
+  const [storename, setStorename] = useState("");
   const [creating, setCreating] = useState(false);
 
-const uploadFile = async (file) => {
-  const formData = new FormData();
-  formData.append("file", file); // fixed key here
-
-  try {
-    const { data } = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/audio-upload`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return data?.url;
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    throw new Error("Failed to upload");
-  }
-};
-
-const uploadImgFile = async (file) => {
-  const formData = new FormData();
-  formData.append("file", file); // fixed key here
-
-  try {
-    const { data } = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/upload`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return data?.url;
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    throw new Error("Failed to upload");
-  }
-};
-
-  const fetchAudiobooks = useCallback(
-    async (page) => {
-      try {
-        setLoading(true);
-        const { data } = await axios.get(
-          `${
-            import.meta.env.VITE_BASE_URL
-          }/admin/audiobook?page=${page}&limit=10`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setAudiobooks(data.audiobooks || []);
-        setTotalPages(data.meta?.totalPages || 1);
-      } catch (error) {
-        console.error("Error fetching audiobooks:", error);
-        showErrorToast("Failed to fetch audiobooks");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
-  );
+  const fetchAudiobooks = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}get-vendors`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAudiobooks(data.vendors || []);
+      setTotalPages(data.meta?.totalPages || 1);
+    } catch (error) {
+      console.error("Error fetching audiobooks:", error);
+      showErrorToast("Failed to fetch audiobooks");
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
     fetchAudiobooks(currentPage);
   }, [fetchAudiobooks, currentPage]);
 
   const handleCreate = async () => {
-    if (!title || !description || !imageFile || !audioFile || !price) {
+    console.log('1');
+    
+    if (!name || !email || !password || !storename) {
       showErrorToast("All fields are required.");
       return;
     }
+    console.log(2);
+    
 
     try {
       setCreating(true);
 
-      // Upload image
-      // const imageUrl = await uploadFile(imageFile);
-
-      // // Upload audio
-      // const audioUrl = await uploadFile(audioFile);
-
-      // Send the URLs in the create audiobook request
-      await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/admin/audiobook/create`,
-        {
-          title,
-          description,
-          price: parseFloat(price),
-          image: imageFile,
-          audio: audioFile,
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("storename", storename);
+      formData.append("logo", "https://res.cloudinary.com/duajvpvod/image/upload/v1747053682/shop-logo-icon-vector_376476-102_gjwzgt.jpg"); // use file object
+      console.log(3);
+      
+      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}add-vendor`, formData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-        Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      });
+      console.log(res, 'res');
+      
 
-      showSuccessToast("Audiobook created successfully");
+      showSuccessToast("Vendor created successfully");
       setOpenModal(false);
       setTitle("");
       setDescription("");
-      setImageFile(null);
-      setAudioFile(null);
       setPrice("");
+      setStorename("");
+      setLogo("");
       fetchAudiobooks(currentPage);
     } catch (err) {
-      console.error("Error creating audiobook:", err);
-      showErrorToast("Failed to create audiobook");
+      console.error("Error creating vendor:", err);
+      showErrorToast("Failed to create vendor");
     } finally {
       setCreating(false);
     }
@@ -168,32 +108,33 @@ const uploadImgFile = async (file) => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(
-        `${import.meta.env.VITE_BASE_URL}/admin/audiobook/delete/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      showSuccessToast("Audiobook deleted");
+      await axios.delete(`${import.meta.env.VITE_BASE_URL}/admin/audiobook/delete/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showSuccessToast("Vendor deleted");
       fetchAudiobooks(currentPage);
     } catch (err) {
-      console.error("Error deleting audiobook:", err);
-      showErrorToast("Failed to delete audiobook");
+      console.error("Error deleting vendor:", err);
+      showErrorToast("Failed to delete vendor");
     }
   };
 
   const handleEdit = (id) => {
-    // Navigate to the edit page with the audiobook ID
-  navigate(`/audio-detail/${id}`);
+    navigate(`/audio-detail/${id}`);
   };
 
   const columns = [
-    { key: "image", label: "Image", render: (row) => <img src={`${import.meta.env.VITE_BASE_URL_IMAGE}${row.image}`} alt={row.title} className="w-16 h-16 rounded" /> },
-    { key: "title", label: "Title", render: (row) => `${row.title}` },
-    { key: "price", label: "Price", render: (row) => `${row.price}` },
-    { key: "audio", label: "Audio", render: (row) => <audio controls src={`${import.meta.env.VITE_BASE_URL_IMAGE}${row.audio}`} /> },
-  
-
+    { key: "name", label: "Name", render: (row) => row.name },
+    { key: "storeName", label: "Storename", render: (row) => row.storename },
+    { key: "email", label: "Email", render: (row) => row.email },
+    { key: "url", label: "URL", render: (row) => row.url },
+    {
+      key: "logo",
+      label: "Logo",
+      render: (row) => (
+        <img src={row.logo} alt="logo" className="h-12 w-12 rounded-full object-cover" />
+      ),
+    },
     {
       key: "actions",
       label: "Actions",
@@ -204,11 +145,11 @@ const uploadImgFile = async (file) => {
               <Eye className="h-5 w-5 text-blue-500" />
             </button>
           </Tooltip>
-        <Tooltip content="Delete">
-          <button onClick={() => handleDelete(row.id)}>
-            <TrashIcon className="h-5 w-5 text-red-500" />
-          </button>
-        </Tooltip>
+          <Tooltip content="Delete">
+            <button onClick={() => handleDelete(row.id)}>
+              <TrashIcon className="h-5 w-5 text-red-500" />
+            </button>
+          </Tooltip>
         </div>
       ),
     },
@@ -221,90 +162,55 @@ const uploadImgFile = async (file) => {
         <div className="flex items-center justify-between">
           <div>
             <Typography variant="h5" color="blue-gray">
-              Audiobooks
+              Venders
             </Typography>
             <Typography color="gray" className="mt-1 font-normal">
-              Manage all audiobooks
+              Manage all Venders
             </Typography>
           </div>
           <Button className="bg-blue-500" onClick={() => setOpenModal(true)}>
-            Add Audiobook
+            Add Vender
           </Button>
         </div>
       </CardHeader>
 
       <Dialog open={openModal} handler={() => setOpenModal(false)}>
-        <DialogHeader>Add a New Audiobook</DialogHeader>
+        <DialogHeader>Add a New Vender</DialogHeader>
         <DialogBody divider>
           <div className="flex flex-col gap-4">
-            <Input
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <Textarea
-              label="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <label className="text-sm text-gray-700 font-medium">
-              Upload Image
-            </label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  try {
-                    const imageUrl = await uploadImgFile(file);
-                    setImageFile(imageUrl);
-                  } catch (error) {
-                    showErrorToast("Failed to upload image",error);
-                  }
-                }
-              }}
-              icon={<PhotoIcon className="h-5 w-5 text-gray-400" />}
-            />
+  <Input
+    label="Name"
+    value={name}
+    onChange={(e) => setTitle(e.target.value)}
+    className="border border-black text-xl p-3 rounded-md"
+  />
+  <Input
+    label="Email"
+    value={email}
+    onChange={(e) => setDescription(e.target.value)}
+    className="border border-black text-xl p-3 rounded-md"
+  />
+  <Input
+    label="Password"
+    value={password}
+    onChange={(e) => setPrice(e.target.value)}
+    type="password"
+    className="border border-black text-xl p-3 rounded-md"
+  />
+  <Input
+    label="Store Name"
+    value={storename}
+    onChange={(e) => setStorename(e.target.value)}
+    className="border border-black text-xl p-3 rounded-md"
+  />
+</div>
 
-            <Input
-              label="Audio"
-              type="file"
-              accept="audio/*"
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  try {
-                    const audioUrl = await uploadFile(file);
-                    setAudioFile(audioUrl);
-                  } catch (error) {
-                    showErrorToast("Failed to upload audio",error);
-                  }
-                }
-              }}
-              icon={<SpeakerWaveIcon className="h-5 w-5 text-gray-400" />}
-            />
-            <Input
-              label="Price"
-              value={price}
-              type="number"
-              onChange={(e) => setPrice(e.target.value)}
-            />
-          </div>
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="text"
-            color="red"
-            onClick={() => setOpenModal(false)}
-          >
+          <Button variant="text" color="red" onClick={() => setOpenModal(false)}>
             Cancel
           </Button>
-          <Button
-            className="bg-blue-500"
-            onClick={handleCreate}
-            disabled={creating}
-          >
+          <Button className="bg-blue-500" onClick={() => handleCreate()} disabled={creating}>
             {creating ? "Creating..." : "Create"}
           </Button>
         </DialogFooter>
@@ -321,13 +227,9 @@ const uploadImgFile = async (file) => {
       </CardBody>
 
       <CardFooter className="flex justify-between">
-        <Button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
+        <Button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
           Previous
         </Button>
-
         <div className="flex items-center gap-2">
           {[...Array(totalPages)].map((_, i) => (
             <IconButton
@@ -341,13 +243,7 @@ const uploadImgFile = async (file) => {
             </IconButton>
           ))}
         </div>
-
-        <Button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
+        <Button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
           Next
         </Button>
       </CardFooter>

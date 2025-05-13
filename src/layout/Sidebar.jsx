@@ -69,7 +69,7 @@ function Sidebar({ routes, isOpen }) {
             />
           </div> */}
           <Typography variant="h5" color="white">
-            Stanley  
+            Ecommerce
           </Typography>
         </div>
         <List>
