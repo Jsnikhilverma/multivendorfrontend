@@ -1,9 +1,9 @@
 import React from "react";
 import { Typography } from "@material-tailwind/react";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-import { UsersIcon } from "@heroicons/react/24/solid";
+// import { UsersIcon } from "@heroicons/react/24/solid";
 import { StatisticsCard } from "@/widgets/cards";
-import { AudioLinesIcon, Video } from "lucide-react";
+import { AudioLinesIcon, Video,UsersIcon } from "lucide-react";
 
 export function Home() {
   const statisticsCardsData = [
@@ -42,7 +42,7 @@ export function Home() {
     },
     {
       color: "gray",
-      icon: QuestionMarkCircleIcon,
+      icon: UsersIcon,
       title: "Total FAQs",
       value: "150",
       footer: {
@@ -75,7 +75,7 @@ export function Home() {
           />
         ))}
       </div>
-      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4 mt-20">
+      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
         {statisticsCardsData.map(({ color, icon, title, value, footer }, index) => (
           <StatisticsCard
             key={index}
