@@ -1,9 +1,8 @@
 import React from "react";
 import { Typography } from "@material-tailwind/react";
-// import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-// import { UsersIcon } from "@heroicons/react/24/solid";
+import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { StatisticsCard } from "@/widgets/cards";
-import { AudioLinesIcon, Video,UsersIcon } from "lucide-react";
+import { AudioLinesIcon, Video, UsersIcon } from "lucide-react";
 
 export function Home() {
   const statisticsCardsData = [
@@ -42,7 +41,7 @@ export function Home() {
     },
     {
       color: "gray",
-      icon: UsersIcon,
+      icon: QuestionMarkCircleIcon,
       title: "Total FAQs",
       value: "150",
       footer: {
@@ -64,7 +63,7 @@ export function Home() {
             value={value}
             color={color}
             icon={React.createElement(icon, {
-              className: "w-6 h-6 text-white",
+              className: "w-6 h-6 text-black", // ← changed here
             })}
             footer={
               <Typography className="font-normal text-blue-gray-600">
@@ -83,7 +82,7 @@ export function Home() {
             value={value}
             color={color}
             icon={React.createElement(icon, {
-              className: "w-6 h-6 text-white",
+              className: "w-6 h-6 text-black", // ← changed here
             })}
             footer={
               <Typography className="font-normal text-blue-gray-600">
