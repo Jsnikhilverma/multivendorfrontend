@@ -9,6 +9,10 @@ import AudiobookDetail from "@/pages/dashboard/audio/AudiobookDetail";
 import VideoDetail from "@/pages/dashboard/video/VideoDetail";
 import TestimonailDetail from "@/pages/dashboard/testimonials/TestimonialDetail";
 import AudioPackageDetail from "@/pages/dashboard/audioPackage/AudioPackageDetail";
+import ProductDetailPage from "@/pages/dashboard/product/ProductDetailPage"
+import UserDetailPage from "@/pages/dashboard/users/UserDetailPage";
+import CatelogDetailPage from "@/pages/dashboard/catelog/CatelogDetailPage";
+import Catelogpdf from "@/pages/dashboard/catelog/Catelogpdf";
 
 const Dashboard = () => {
   // Local state for toggling sidebar visibility on mobile
@@ -35,7 +39,14 @@ const Dashboard = () => {
           <Route path="/audio-detail/:id" element={<AudiobookDetail />} />
           <Route path="/video-detail/:id" element={<VideoDetail />} />
           <Route path="/testimonials-detail/:id" element={<TestimonailDetail />} />
-          <Route path="/audio-package-detail/:id" element={<AudioPackageDetail />} />
+          <Route path="/product-package-detail/:id" element={<AudioPackageDetail />} />
+          <Route path="/product-detail/:id" element={<ProductDetailPage />} />
+          <Route path="/user/:id" element={<UserDetailPage />} />
+          <Route path="/catelog/:id" element={<CatelogDetailPage />} />
+          <Route path="/catelogpdf/:id" element={<Catelogpdf />} />
+          
+          
+
 
           {routes.map(({ layout, pages }) =>
             layout === "dashboard"

@@ -4,7 +4,7 @@ import PrivateRoute from "@/components/PrivateRoute";
 // import CreateFaq from "@/pages/dashboard/Faq/CreateFaq";
 import Audiobooks from "@/pages/dashboard/audio/Audiobooks";
 // import VideoBooks from "@/pages/dashboard/video/VideoBook";
-import { AudioLinesIcon} from "lucide-react";
+import { UserIcon} from "lucide-react";
 // import Users from "@/pages/dashboard/users/users";
 // import FreeAudiobooks from "@/pages/dashboard/audioFree/FreeAudiobooks";
 // import CreateTestimonial from "@/pages/dashboard/testimonials/CreateTestimonial";
@@ -39,8 +39,8 @@ export const routes = [
       //   ),
       // },
       {
-        icon: <AudioLinesIcon className={iconClass} />,
-        name: "Stores",
+        icon: <UserIcon className={iconClass} />,
+        name: "Vendor",
         path: "/Venders", // Fixed path
         element: (
           <PrivateRoute>

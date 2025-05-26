@@ -1,202 +1,314 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
 import {
+  Button,
   Card,
   CardBody,
-  Typography,
+  CardFooter,
+  CardHeader,
+  IconButton,
   Spinner,
-  Button,
+  Tooltip,
+  Typography,
 } from "@material-tailwind/react";
+import { TrashIcon } from "@heroicons/react/24/solid";
+import { Eye } from "lucide-react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Toaster, {
+  showSuccessToast,
+  showErrorToast,
+} from "../../../components/Toaster";
+import CustomTable from "../../../components/CustomTable";
 
 const AudioPackageDetail = () => {
-  const { id } = useParams();
   const token = Cookies.get("token");
-  const [pack, setPack] = useState(null);
-  const [audioBooks, setAudioBooks] = useState([]);
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentAudio, setCurrentAudio] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const fetchPackDetails = async () => {
-      try {
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/admin/pack/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setPack(data.pack);
-        setAudioBooks(data.audioBooks);
-        if (data.audioBooks.length > 0) {
-          setCurrentAudio(data.audioBooks[0]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch package details", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [creating, setCreating] = useState(false);
 
-    fetchPackDetails();
-  }, [id, token]);
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const IMG_BASE_URL = import.meta.env.VITE_BASE_URL_IMG;
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner className="h-10 w-10 text-blue-500" />
-      </div>
-    );
-  }
-
-  if (!pack) {
-    return (
-      <div className="text-center mt-10 text-red-500">
-        Audio package not found.
-      </div>
-    );
-  }
-
-  const calculateSavings = () => {
-    if (pack.price && pack.discountedPrice) {
-      const savings = pack.price - pack.discountedPrice;
-      const savingsPercentage = (savings / pack.price) * 100;
-      return savingsPercentage.toFixed(0);
-    }
-    return 0;
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setCategory("");
+    setPrice("");
+    setImageFile(null);
   };
 
-  return (
-    <div className="max-w-6xl mx-auto mt-8 px-4">
-      {/* Package Header Card */}
-      <Card className="shadow-lg mb-8">
-        <div className="flex flex-col md:flex-row">
-          {/* Package Image */}
-          <div className="md:w-1/3">
-            <img
-              src={`${import.meta.env.VITE_BASE_URL_IMAGE}${pack.image}`}
-              alt={pack.title}
-              className="h-full w-full object-cover rounded-t-xl md:rounded-l-xl md:rounded-tr-none"
-            />
-          </div>
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(
+        `${BASE_URL}products/by-vendor/${id}?page=${currentPage}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setProducts(data.products || []);
+      setTotalPages(data.meta?.totalPages || 1);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      showErrorToast("Failed to fetch products");
+    } finally {
+      setLoading(false);
+    }
+  }, [BASE_URL, token, id, currentPage]);
 
-          {/* Package Details */}
-          <CardBody className="md:w-2/3 p-6 space-y-4">
-            <div className="flex justify-between items-start">
-              <Typography variant="h3" color="blue-gray" className="font-bold">
-                {pack.title}
-              </Typography>
-              {pack.free ? (
-                <div className="bg-green-500 text-white px-4 py-1 rounded-full">
-                  Free
-                </div>
-              ) : null}
-            </div>
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
-            <Typography color="gray" className="text-lg">
-              {pack.description}
-            </Typography>
+  const handleCreate = async () => {
+    if (!name || !category || !price) {
+      showErrorToast("Please fill required fields: name, category, and price.");
+      return;
+    }
 
-            <div className="flex items-center space-x-4">
-              {!pack.free && (
-                <>
-                  <Typography color="green" className="text-2xl font-bold">
-                    ${pack.discountedPrice}
-                  </Typography>
-                  <Typography color="gray" className="text-lg line-through">
-                    ${pack.price}
-                  </Typography>
-                  <div className="bg-red-100 text-red-800 px-2 py-1 rounded">
-                    Save {calculateSavings()}%
-                  </div>
-                </>
-              )}
-            </div>
+    try {
+      setCreating(true);
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price);
+      formData.append("category", category);
 
-            <div className="pt-4">
-              <Typography variant="h6" color="blue-gray">
-                Package Includes:
-              </Typography>
-              <Typography color="gray">
-                {audioBooks.length} audiobooks
-              </Typography>
-            </div>
+      const { data } = await axios.post(
+        `${BASE_URL}products/add/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-            {/* <Button 
-              color="blue" 
-              className="mt-4"
-              fullWidth
-            >
-              {pack.free ? "Get Free Package" : "Purchase Package"}
-            </Button> */}
-          </CardBody>
+      showSuccessToast("Product created successfully");
+      resetForm();
+      setOpenModal(false);
+      fetchProducts();
+    } catch (error) {
+      console.error("Create failed:", error);
+      showErrorToast("Failed to create product");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // Updated handleDelete with your API endpoint
+  const handleDelete = async (productId) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      await axios.delete(`${BASE_URL}products/delete/${productId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showSuccessToast("Product deleted");
+      fetchProducts();
+    } catch (err) {
+      console.error("Delete failed:", err);
+      showErrorToast("Failed to delete product");
+    }
+  };
+
+  const handleEdit = (productId) => {
+    navigate(`/product-detail/${productId}`);
+  };
+
+  const columns = [
+    {
+      key: "image",
+      label: "Image",
+      render: (row) => (
+        <img
+          src={
+            row.imageUrl
+              ? `${IMG_BASE_URL}${row.imageUrl}`
+              : "/placeholder-image.png"
+          }
+          alt={row.name}
+          className="w-16 h-16 rounded object-cover"
+        />
+      ),
+    },
+    { key: "name", label: "Name", render: (row) => row.name || "N/A" },
+    { key: "category", label: "Category", render: (row) => row.category || "N/A" },
+    {
+      key: "price",
+      label: "Price",
+      render: (row) =>
+        typeof row.price === "number" ? `$${row.price.toFixed(2)}` : "N/A",
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (row) => (
+        <div className="flex items-center gap-2">
+          <Tooltip content="View Details">
+            <button onClick={() => handleEdit(row._id)}>
+              <Eye className="h-5 w-5 text-blue-500" />
+            </button>
+          </Tooltip>
+          <Tooltip content="Delete">
+            <button onClick={() => handleDelete(row._id)}>
+              <TrashIcon className="h-5 w-5 text-red-500" />
+            </button>
+          </Tooltip>
         </div>
-      </Card>
+      ),
+    },
+  ];
 
-      {/* Current Playing Audiobook Section */}
-      {currentAudio && (
-        <Card className="shadow-lg mb-8">
-          <div className="flex flex-col md:flex-row">
-            <div className="md:w-1/4">
-              <img
-                src={`${import.meta.env.VITE_BASE_URL_IMAGE}${currentAudio.image}`}
-                alt={currentAudio.title}
-                className="h-full w-full object-cover rounded-t-xl md:rounded-l-xl md:rounded-tr-none"
+  return (
+    <Card>
+      <Toaster />
+      <CardHeader floated={false} shadow={false} className="rounded-none">
+        <div className="flex items-center justify-between">
+          <div>
+            <Typography variant="h5" color="blue-gray">
+              Vendor Products
+            </Typography>
+            <Typography color="gray" className="mt-1 font-normal">
+              Manage all products for this vendor
+            </Typography>
+          </div>
+          <Button className="bg-blue-500" onClick={() => setOpenModal(true)}>
+            Add Product
+          </Button>
+        </div>
+      </CardHeader>
+
+      {/* Modal */}
+      {openModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl border">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Add a New Product</h3>
+              <button
+                onClick={() => {
+                  setOpenModal(false);
+                  resetForm();
+                }}
+                className="text-xl font-bold text-gray-500 hover:text-red-500"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <input
+                type="text"
+                placeholder="Name *"
+                className="border p-2 rounded"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Category *"
+                className="border p-2 rounded"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              />
+              <textarea
+                placeholder="Description"
+                className="border p-2 rounded"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <input
+                type="number"
+                placeholder="Price *"
+                className="border p-2 rounded"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                className="border p-2 rounded"
+                onChange={(e) => setImageFile(e.target.files[0])}
               />
             </div>
-            <CardBody className="md:w-3/4 p-6 space-y-4">
-              <Typography variant="h5" color="blue-gray" className="font-bold">
-                Now Playing: {currentAudio.title}
-              </Typography>
-              <audio controls className="w-full rounded-md shadow-sm">
-                <source src={`${import.meta.env.VITE_BASE_URL_IMAGE}${currentAudio.audio}`} type="audio/mpeg" />
-                Your browser does not support the audio element.
-              </audio>
-              <Typography color="gray" className="text-base">
-                {currentAudio.description}
-              </Typography>
-            </CardBody>
+
+            <div className="flex justify-end mt-6 gap-2">
+              <button
+                className="px-4 py-2 text-red-500"
+                onClick={() => {
+                  setOpenModal(false);
+                  resetForm();
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={handleCreate}
+                disabled={creating}
+              >
+                {creating ? "Creating..." : "Create"}
+              </button>
+            </div>
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* List of All Audiobooks in Package */}
-      <Typography variant="h4" color="blue-gray" className="font-bold mb-4">
-        Included Audiobooks
-      </Typography>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {audioBooks?.map((book) => (
-          <Card key={book.id} className="shadow-md hover:shadow-xl transition-shadow">
-            <div className="relative pb-2/3">
-              <img
-                src={`${import.meta.env.VITE_BASE_URL_IMAGE}${book?.image}`}
-                alt={book.title}
-                className="h-48 w-full object-cover rounded-t-xl"
-              />
-            </div>
-            <CardBody className="p-4">
-              <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
-                {book?.title}
-              </Typography>
-              <Typography color="gray" className="text-sm mb-3 line-clamp-2">
-                {book.description}
-              </Typography>
-              <Button 
-                color="blue" 
-                size="sm" 
-                fullWidth
-                onClick={() => setCurrentAudio(book)}
-              >
-                Play Now
-              </Button>
-            </CardBody>
-          </Card>
-        ))}
-      </div>
-    </div>
+      {/* Table */}
+      <CardBody>
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <Spinner className="h-8 w-8 text-blue-500" />
+          </div>
+        ) : (
+          <CustomTable columns={columns} data={products} />
+        )}
+      </CardBody>
+
+      {/* Pagination */}
+      <CardFooter className="flex justify-between items-center py-4">
+        <Button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </Button>
+        <div className="flex gap-1">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <IconButton
+              key={i + 1}
+              variant={currentPage === i + 1 ? "filled" : "text"}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </IconButton>
+          ))}
+        </div>
+        <Button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

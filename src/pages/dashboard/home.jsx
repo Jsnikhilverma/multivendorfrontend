@@ -20,7 +20,7 @@ export function Home() {
     {
       color: "gray",
       icon: AudioLinesIcon,
-      title: "All Venders",
+      title: "All Vendors",
       value: "1,230",
       footer: {
         color: "text-green-500",
