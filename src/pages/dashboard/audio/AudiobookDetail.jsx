@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -26,6 +26,7 @@ const AudiobookDetail = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [storeURL, setStoreURL] = useState("");
 
   useEffect(() => {
     const fetchAudiobookById = async () => {
@@ -56,6 +57,8 @@ const AudiobookDetail = () => {
     setPhone(audiobook.phone || "");
     setEmail(audiobook.email || "");
     setAddress(audiobook.address || "");
+    setStoreURL(audiobook.storeURL || "");
+
     setOpenModal(true);
   };
 
@@ -64,7 +67,7 @@ const AudiobookDetail = () => {
     try {
       const response = await axios.put(
         `vendors/update/${id}`,
-        { name, company, phone, email, address },
+        { name, company, phone, email, address, storeURL },
         {
           headers: {
             "Content-Type": "application/json",
@@ -123,7 +126,7 @@ const AudiobookDetail = () => {
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4 font-sans">
       <Toaster />
-     <Card className="shadow-3xl rounded-3xl p-8 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 transform transition-all hover:shadow-4xl hover:-translate-y-1">
+    <Card className="shadow-3xl rounded-3xl p-8 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 transform transition-all hover:shadow-4xl hover:-translate-y-1">
   <div className="flex items-center justify-between mb-8">
     <Typography variant="h3" className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
       Vendor Profile
@@ -133,54 +136,67 @@ const AudiobookDetail = () => {
     </div>
   </div>
 
-  <CardBody className="space-y-8">
-    <div className="border-b border-indigo-100 pb-6">
-      <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Name</Typography>
-      <Typography className="text-xl font-semibold text-gray-800">{audiobook.name}</Typography>
-    </div>
+  <CardBody>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
+      <div className="border-b border-indigo-100 pb-6">
+        <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Name</Typography>
+        <Typography className="text-xl font-semibold text-gray-800">{audiobook.name}</Typography>
+      </div>
 
-    <div className="border-b border-indigo-100 pb-6">
-      <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Status</Typography>
-      <div className="inline-flex items-center px-3 py-1 rounded-full bg-opacity-10 text-sm font-semibold tracking-wide 
-        ${audiobook.status ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-        {audiobook.status ? (
-          <>
-            <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
-            Active
-          </>
-        ) : (
-          <>
-            <div className="w-2 h-2 rounded-full bg-rose-500 mr-2"></div>
-            Inactive
-          </>
-        )}
+      <div className="border-b border-indigo-100 pb-6">
+        <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Status</Typography>
+        <div className={`inline-flex items-center px-3 py-1 rounded-full bg-opacity-10 text-sm font-semibold tracking-wide ${
+          audiobook.status ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+        }`}>
+          {audiobook.status ? (
+            <>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
+              Active
+            </>
+          ) : (
+            <>
+              <div className="w-2 h-2 rounded-full bg-rose-500 mr-2"></div>
+              Inactive
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="border-b border-indigo-100 pb-6">
+        <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Company</Typography>
+        <Typography className="text-xl font-semibold text-gray-800">{audiobook.company}</Typography>
+      </div>
+
+      <div className="border-b border-indigo-100 pb-6">
+        <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Email</Typography>
+        <div className="flex items-center">
+          <Mail className="h-5 w-5 text-indigo-400 mr-2" />
+          <Typography className="text-xl font-medium text-blue-600 hover:text-blue-800 transition-colors">
+            {audiobook.email}
+          </Typography>
+        </div>
+      </div>
+
+      <div className="border-b border-indigo-100 pb-6">
+        <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Phone</Typography>
+        <div className="flex items-center">
+          <Phone className="h-5 w-5 text-indigo-400 mr-2" />
+          <Typography className="text-xl font-medium text-gray-800">{audiobook.phone}</Typography>
+        </div>
+      </div>
+
+      <div className="border-b border-indigo-100 pb-6">
+        <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">StoreURL</Typography>
+              <div className="flex items-center">
+                <Link to={audiobook.storeURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors">
+                  <Typography className="text-xl font-medium text-gray-800">{audiobook.storeURL}</Typography>
+                </Link>
+        </div>
       </div>
     </div>
-
-    <div className="border-b border-indigo-100 pb-6">
-      <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Company</Typography>
-      <Typography className="text-xl font-semibold text-gray-800">{audiobook.company}</Typography>
-    </div>
-
-    <div className="border-b border-indigo-100 pb-6">
-      <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Email</Typography>
-      <div className="flex items-center">
-        <Mail className="h-5 w-5 text-indigo-400 mr-2" />
-        <Typography className="text-xl font-medium text-blue-600 hover:text-blue-800 transition-colors">
-          {audiobook.email}
-        </Typography>
-      </div>
-    </div>
-
-    <div>
-      <Typography className="text-xs uppercase tracking-wider font-medium text-indigo-400 mb-1">Phone</Typography>
-      <div className="flex items-center">
-        <Phone className="h-5 w-5 text-indigo-400 mr-2" />
-        <Typography className="text-xl font-medium text-gray-800">{audiobook.phone}</Typography>
-      </div>
-          </div>
   </CardBody>
 </Card>
+
 
       <div className="flex justify-end mt-6 space-x-4">
         <Button
@@ -254,6 +270,16 @@ const AudiobookDetail = () => {
               <Input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                className="peer"
+              />
+
+              <label className="text-sm text-gray-500 peer-focus:text-indigo-600 peer-focus:font-semibold">
+                StoreURL
+              </label>
+             
+              <Input
+                value={storeURL}
+                onChange={(e) => setStoreURL(e.target.value)}
                 className="peer"
               />
               

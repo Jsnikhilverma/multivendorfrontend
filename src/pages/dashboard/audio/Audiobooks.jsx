@@ -14,7 +14,7 @@ import Cookies from "js-cookie";
 import { useCallback, useEffect, useState } from "react";
 import Toaster, { showSuccessToast, showErrorToast } from "../../../components/Toaster";
 import CustomTable from "../../../components/CustomTable";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu } from "@headlessui/react";
 import { EllipsisVertical, Eye, TrashIcon } from "lucide-react";
 // import { set } from "lodash";
@@ -35,6 +35,7 @@ const Audiobooks = () => {
   const [storename, setStorename] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [storeURL, setstoreURL] = useState("");
   const [creating, setCreating] = useState(false);
 
   // Track editing vendor ID (null means creating new)
@@ -66,7 +67,7 @@ const Audiobooks = () => {
 
   // Create new vendor
   const handleCreate = async () => {
-    if (!name || !email || !storename || !phone || !address) {
+    if (!name || !email || !storename || !phone || !address || !storeURL) {
       showErrorToast("All fields are required.");
       return;
     }
@@ -79,6 +80,7 @@ const Audiobooks = () => {
         phone,
         email,
         address,
+        storeURL, // Assuming backend expects 'storeURL'
       };
 
       await axios.post(`${import.meta.env.VITE_BASE_URL}vendors/create`, body, {
@@ -98,7 +100,7 @@ const Audiobooks = () => {
 
   // Update existing vendor
   const handleUpdate = async () => {
-    if (!name || !email || !storename) {
+    if (!name || !email || !storename || !phone || !address || !storeURL) {
    setOpenModal(true)
       return;
     }
@@ -108,7 +110,10 @@ const Audiobooks = () => {
       const body = {
         name,
         email,
-        company: storename, // backend expects 'company' for store name
+        company: storename,// backend expects 'company' for store name
+        phone,
+        address,
+        storeURL, // Assuming backend expects 'storeURL'
       };
 
       await axios.put(`${import.meta.env.VITE_BASE_URL}vendors/update/${editingVendorId}`, body, {
@@ -154,6 +159,7 @@ const Audiobooks = () => {
       setStorename(data.company || "");
       setPhone(data.phone || "");
       setAddress(data.address || "");
+      setstoreURL(data.storeURL || "");
       setPassword(""); // password not editable here
 
       setEditingVendorId(id);
@@ -176,6 +182,7 @@ const Audiobooks = () => {
     setStorename("");
     setPhone("");
     setAddress("");
+    setstoreURL("");
   };
 
   // Table columns
@@ -184,6 +191,14 @@ const Audiobooks = () => {
     { key: "company", label: "Company", render: (row) => row.company },
     { key: "email", label: "Email", render: (row) => row.email },
     { key: "phone", label: "Phone", render: (row) => row.phone || "N/A" },
+    // { key: "address", label: "Address", render: (row) => row.address || "N/A" },
+    {
+      key: "storeURL", label: "Store URL", render: (row) => (
+        <Link to={row.storeURL} target="_blank" className="text-blue-500 hover:underline">
+          {row.storeURL || "N/A"}
+        </Link>
+      ),
+    },
     // {
     //   key: "logo",
     //   label: "Logo",
@@ -314,6 +329,15 @@ const Audiobooks = () => {
                 className="w-full border border-gray-300 rounded-md p-2"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+              />
+                </div>
+                 <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">StoreURL</label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-md p-2"
+                value={storeURL}
+                onChange={(e) => setstoreURL(e.target.value)}
               />
             </div>
           </>
