@@ -63,7 +63,7 @@ export function Home() {
             value={value}
             color={color}
             icon={React.createElement(icon, {
-              className: "w-6 h-6 text-black", // ← changed here
+              className: "w-6 h-6 text-white", // ← changed here
             })}
             footer={
               <Typography className="font-normal text-blue-gray-600">
@@ -82,7 +82,7 @@ export function Home() {
             value={value}
             color={color}
             icon={React.createElement(icon, {
-              className: "w-6 h-6 text-black", // ← changed here
+              className: "w-6 h-6 text-white", // ← changed here
             })}
             footer={
               <Typography className="font-normal text-blue-gray-600">

@@ -205,13 +205,13 @@ const navigate = useNavigate();
         </Typography>
        
         <div className="flex gap-3">
-          <Button
+          {/* <Button
             className="bg-blue-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 px-6 py-3 rounded-lg"
             onClick={handlePreviewOnly}
           >
             <Download size={18} />
             Preview PDF
-          </Button>
+          </Button> */}
           <Button
             className="bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 px-6 py-3 rounded-lg"
             onClick={() => window.location.href = `/catelogpdf/${id}`}

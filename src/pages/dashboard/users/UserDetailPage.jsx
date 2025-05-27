@@ -63,7 +63,7 @@ const UserDetailPage = () => {
     setUpdating(true);
     try {
       const response = await axios.put(
-        `http://localhost:4000/api/users/update/${id}`,
+        `${import.meta.env.VITE_BASE_URL}users/update/${id}`,
         { name, company, phone, email, address },
         {
           headers: {

@@ -184,13 +184,13 @@ const Audiobooks = () => {
     { key: "company", label: "Company", render: (row) => row.company },
     { key: "email", label: "Email", render: (row) => row.email },
     { key: "phone", label: "Phone", render: (row) => row.phone || "N/A" },
-    {
-      key: "logo",
-      label: "Logo",
-      render: (row) => (
-        <img src={row.logo} alt="logo" className="h-12 w-12 rounded-full object-cover" />
-      ),
-    },
+    // {
+    //   key: "logo",
+    //   label: "Logo",
+    //   render: (row) => (
+    //     <img src={row.logo} alt="logo" className="h-12 w-12 rounded-full object-cover" />
+    //   ),
+    // },
     {
       key: "actions",
       label: "Actions",

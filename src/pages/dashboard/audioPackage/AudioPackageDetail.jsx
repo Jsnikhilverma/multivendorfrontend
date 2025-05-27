@@ -82,14 +82,14 @@ const AudioPackageDetail = () => {
     try {
       setCreating(true);
       const formData = new FormData();
-      formData.append("file", imageFile);
+      formData.append("image", imageFile);
       formData.append("name", name);
       formData.append("description", description);
       formData.append("price", price);
       formData.append("category", category);
 
-      const { data } = await axios.post(
-        `${BASE_URL}products/add/${id}`,
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}products/add/${id}`,
         formData,
         {
           headers: {

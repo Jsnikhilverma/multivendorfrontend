@@ -63,7 +63,7 @@ const AudiobookDetail = () => {
     setUpdating(true);
     try {
       const response = await axios.put(
-        `http://localhost:4000/api/vendors/update/${id}`,
+        `vendors/update/${id}`,
         { name, company, phone, email, address },
         {
           headers: {
@@ -88,7 +88,7 @@ const AudiobookDetail = () => {
       const updatedStatus = !audiobook.status;
       const statusText = updatedStatus ? "active" : "inactive";
       await axios.put(
-        `http://localhost:4000/api/vendors/set-status/${id}`,
+        `${import.meta.env.VITE_BASE_URL}vendors/set-status/${id}`,
         { status: statusText },
         {
           headers: {

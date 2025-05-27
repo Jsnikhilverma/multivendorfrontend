@@ -13,7 +13,7 @@ function CatalogExport({ vendorId }) {
     if (logo) formData.append('logo', logo);
 
     const response = await axios.post(
-      `http://localhost:4000/api/catalog/export/${vendorId}`,
+      `${import.meta.env.VITE_BASE_URL}catalog/export/${vendorId}`,
       formData,
       { responseType: 'blob' }
     );
